@@ -31,7 +31,7 @@ body{background:var(--bg-page);color:var(--text);font-family:'Montserrat',sans-s
 /* Golden shimmer: tiny gold sparkles that twinkle softly behind the content */
 .shimmer{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden;border-radius:inherit}
 .spark{position:absolute;width:var(--s);height:var(--s);opacity:0;
-  background:radial-gradient(circle,#fff8e1 0%,#e8c46e 30%,#c99a3e 55%,rgba(201,154,62,0) 75%);filter:drop-shadow(0 0 3px rgba(232,196,110,.7));
+  background:radial-gradient(circle,#fffbea 0%,#f0d088 28%,#d2a54c 52%,rgba(201,154,62,0) 76%);
   clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);
   animation:twinkle var(--t) ease-in-out infinite;animation-delay:var(--d)}
 .spark.dot{clip-path:none;border-radius:50%}
@@ -60,11 +60,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @keyframes petalFall{to{transform:translate(var(--dx),420px) rotate(var(--rot));opacity:0}}
 @media(prefers-reduced-motion:reduce){.petal{display:none}}
 /* ===== Envelope intro: tap the wax seal to open ===== */
+html{scrollbar-gutter:stable}   /* no sideways nudge when scrolling turns back on */
 body.sealed{overflow:hidden}
-body.sealed main{opacity:0}
+body.sealed main{opacity:0;will-change:opacity,transform}
+body.sealed .spark,body.sealed .arch-card::after{animation-play-state:paused}
+#envelope{will-change:opacity}
 body.sealed .couple-name,body.sealed .couple-and{animation-play-state:paused}
-main.reveal{animation:cardIn 2s cubic-bezier(.33,0,.15,1) both}
-@keyframes cardIn{from{opacity:0;transform:translateY(24px);filter:blur(6px)}60%{filter:blur(0)}to{opacity:1;transform:none;filter:none}}
+main.reveal{animation:cardIn 1.8s cubic-bezier(.25,.1,.25,1) both;will-change:opacity,transform}
+main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
+@keyframes cardIn{from{opacity:0;transform:translate3d(0,18px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
 
 #envelope{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
   background:radial-gradient(ellipse at 50% 40%,#f7f1e8 0%,#f2ece4 60%,#ebe2d5 100%);padding:16px;transition:opacity 1.6s ease}
@@ -369,11 +373,10 @@ function setupEnvelope() {
     at(1500, () => env.classList.add("lifted"));                   // letter glides up
     at(3000, () => {                                               // envelope drifts away, invitation fades in
       env.classList.add("leaving", "gone");
-      document.body.classList.remove("sealed");
       document.querySelector("main").classList.add("reveal");
       window.scrollTo(0, 0);
     });
-    at(4700, () => env.remove());
+    at(4700, () => { env.remove(); document.body.classList.remove("sealed"); });   // tidy up once the envelope has gone
   }, { once: true });
 }
 
