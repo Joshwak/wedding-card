@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wedding Invitation | Joshwa & Ribeca</title>
+<meta property="og:title" content="You're Invited! Joshwa & Ribeca's Wedding" />
+<meta property="og:description" content="Tap to view our digital wedding invitation, schedule of events, and RSVP." />
+<meta property="og:type" content="website" />
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500;600&family=Pinyon+Script&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root{--bg-page:#f2ece4;--bg-card:#fbf9f5;--gold:#b5945b;--gold-dark:#8c6d3b;--text:#4a4238;--muted:#7a7064}
+body{background:var(--bg-page);color:var(--text);font-family:'Montserrat',sans-serif;overflow-x:hidden;margin:0}
+.font-script{font-family:'Pinyon Script',cursive}
+.font-serif-title{font-family:'Playfair Display',serif}
+.arch-card{background:var(--bg-card);border-radius:260px 260px 24px 24px;box-shadow:0 20px 60px rgba(74,66,56,.12),0 0 0 1px rgba(181,148,91,.25);position:relative;overflow:hidden}
+.arch-inner{border-radius:250px 250px 18px 18px;border:1px solid rgba(181,148,91,.35);isolation:isolate}
+/* Golden shimmer: tiny gold sparkles that twinkle softly behind the content */
+.shimmer{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden;border-radius:inherit}
+.spark{position:absolute;width:var(--s);height:var(--s);opacity:0;
+  background:radial-gradient(circle,#fff8e1 0%,#e8c46e 30%,#c99a3e 55%,rgba(201,154,62,0) 75%);filter:drop-shadow(0 0 3px rgba(232,196,110,.7));
+  clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);
+  animation:twinkle var(--t) ease-in-out infinite;animation-delay:var(--d)}
+.spark.dot{clip-path:none;border-radius:50%}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(.4) rotate(0)}50%{opacity:var(--o);transform:scale(1) rotate(45deg)}}
+.arch-card::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(115deg,transparent 40%,rgba(236,214,160,.28) 50%,transparent 60%);background-size:250% 100%;
+  animation:sheen 7s ease-in-out 1.5s infinite}
+@keyframes sheen{0%{background-position:130% 0}45%,100%{background-position:-30% 0}}
+@media(prefers-reduced-motion:reduce){.spark{animation:none;opacity:calc(var(--o) * .6)}.arch-card::after{animation:none;opacity:0}}
+/* Couple names: flowing calligraphy that gently fades up, one line after another */
+.couple{display:flex;flex-direction:column;align-items:center;font-weight:400;font-size:inherit;margin-block:1rem}
+.couple-name{font-family:'Great Vibes',cursive;font-size:4.2rem;line-height:1.05;color:var(--gold-dark);animation:fadeUp 1.2s ease both}
+.couple-and{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:1.35rem;letter-spacing:.1em;color:var(--gold);margin:2px 0;animation:fadeUp 1.2s ease .5s both}
+.couple-name.second{animation-delay:.9s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media(max-width:480px){.couple-name{font-size:3.5rem}}
+@media(prefers-reduced-motion:reduce){.couple-name,.couple-and{animation:none}}
+@keyframes floatSlow{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-6px) rotate(1.5deg)}}
+.floral-float{animation:floatSlow 7s ease-in-out infinite}
+
+@media(prefers-reduced-motion:reduce){.floral-float{animation:none}}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold-dark);outline-offset:2px}
+.hidden-el{display:none}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.petal{position:absolute;top:-12px;width:9px;height:13px;border-radius:60% 0 60% 0;opacity:.9;animation:petalFall 2.6s ease-in forwards}
+@keyframes petalFall{to{transform:translate(var(--dx),420px) rotate(var(--rot));opacity:0}}
+@media(prefers-reduced-motion:reduce){.petal{display:none}}
+/* ===== Envelope intro: tap the wax seal to open ===== */
+body.sealed{overflow:hidden}
+body.sealed main{opacity:0}
+body.sealed .couple-name,body.sealed .couple-and{animation-play-state:paused}
+main.reveal{animation:cardIn 2s cubic-bezier(.33,0,.15,1) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(24px);filter:blur(6px)}60%{filter:blur(0)}to{opacity:1;transform:none;filter:none}}
+
+#envelope{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  background:radial-gradient(ellipse at 50% 40%,#f7f1e8 0%,#f2ece4 60%,#ebe2d5 100%);padding:16px;transition:opacity 1.6s ease}
+#envelope.gone{opacity:0;pointer-events:none}
+.env-hint{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:1.05rem;color:#7a7064;letter-spacing:.04em;transition:opacity .4s}
+.env-to{transition:opacity .4s;font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7a7064;text-align:center;min-height:1.2em}
+.env-to b{display:block;font-family:'Great Vibes',cursive;font-weight:400;font-size:2rem;letter-spacing:0;text-transform:none;color:#8c6d3b;margin-top:4px}
+
+#envelope *,#envelope *::before,#envelope *::after{box-sizing:border-box}
+.env{position:relative;width:min(68vw,290px);aspect-ratio:.7/1;perspective:1600px;transition:transform 1.4s cubic-bezier(.4,0,.2,1),opacity 1.4s ease}
+.env-back{position:absolute;inset:0;background:#e6dccd;border-radius:10px;box-shadow:0 24px 50px rgba(74,66,56,.18),0 2px 6px rgba(74,66,56,.08)}
+.env-letter{position:absolute;left:7%;right:7%;top:5%;height:90%;background:#fbf9f5;border-radius:8px;border:1px solid rgba(181,148,91,.3);
+  display:flex;align-items:flex-start;justify-content:center;padding-top:16%;transition:transform 1.6s cubic-bezier(.45,0,.2,1);z-index:1}
+.env-letter span{font-family:'Great Vibes',cursive;font-size:clamp(1.6rem,7vw,2.2rem);color:#8c6d3b}
+.env-front{position:absolute;inset:0;z-index:2;border-radius:10px;overflow:hidden;pointer-events:none}
+.env-front::before{content:"";position:absolute;inset:0;background:#efe6da;clip-path:polygon(0 0,50% 48%,100% 0,100% 100%,0 100%)}
+.env-front::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#f4ece1,#ece2d4);clip-path:polygon(0 100%,50% 58%,100% 100%)}
+.env-flap{position:absolute;left:0;right:0;top:0;height:48%;z-index:3;transform-origin:50% 0;transition:transform 1.3s cubic-bezier(.45,0,.25,1),z-index 0s .65s}
+.env-flap::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#e9dfd0,#f1e9dd);clip-path:polygon(0 0,100% 0,50% 100%);
+  filter:drop-shadow(0 3px 3px rgba(74,66,56,.12))}
+.env-edge{position:absolute;inset:0;z-index:2;border-radius:10px;border:1px solid rgba(181,148,91,.28);pointer-events:none}
+
+.seal{position:absolute;left:50%;top:48%;width:80px;height:80px;transform:translate(-50%,-50%);z-index:4;border:0;padding:0;cursor:pointer;background:none;
+  transition:transform .9s ease,opacity .9s ease;-webkit-tap-highlight-color:transparent}
+.seal-wax{position:absolute;inset:0;border-radius:47% 53% 50% 50% / 52% 48% 52% 48%;
+  background:radial-gradient(circle at 35% 30%,#e3c27e 0%,#c49a4c 38%,#9c7433 72%,#7f5c27 100%);
+  box-shadow:0 6px 14px rgba(90,62,20,.35),inset 0 -4px 8px rgba(70,45,10,.35),inset 0 3px 6px rgba(255,240,200,.35)}
+.seal-ring{position:absolute;inset:11px;border-radius:50%;border:1.5px solid rgba(255,236,190,.45);box-shadow:inset 0 0 0 1px rgba(90,60,20,.25)}
+.seal-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Great Vibes',cursive;font-size:2.15rem;color:#f6e5bd;
+  text-shadow:0 -1px 0 rgba(80,52,15,.55),0 1px 1px rgba(255,245,215,.4);padding-top:2px}
+.seal:hover{transform:translate(-50%,-50%) scale(1.05)}
+.seal:focus-visible{outline:2px solid #8c6d3b;outline-offset:4px;border-radius:50%}
+.seal{animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{filter:drop-shadow(0 0 0 rgba(232,196,110,0))}50%{filter:drop-shadow(0 0 12px rgba(232,196,110,.75))}}
+
+#envelope.opening .seal{transform:translate(-50%,-46%) scale(.92);opacity:0;animation:none}
+#envelope.opening .env-hint,#envelope.opening .env-to{opacity:0}
+#envelope.flap .env-flap{transform:rotateX(180deg);z-index:0}
+#envelope.lifted .env-letter{transform:translateY(-46%)}
+#envelope.leaving .env{transform:translateY(28px);opacity:0}
+@media(prefers-reduced-motion:reduce){.seal{animation:none}.env-flap,.env-letter,.seal{transition-duration:.01s}main.reveal{animation:none}}
+/* Rotating Bible verse at the top of the card */
+.verse{width:100%;max-width:17.5rem;min-height:7.4rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.55rem;margin-inline:auto;
+  transition:opacity 1.4s ease,filter 1.4s ease,transform 1.4s ease}
+.verse.fading{opacity:0;filter:blur(3px);transform:translateY(4px)}
+.verse-text{margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:1.08rem;line-height:1.45;color:#4a4238;text-wrap:balance}
+.verse-text::before{content:"\201C"}.verse-text::after{content:"\201D"}
+.verse-ref{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#b5945b}
+@media(prefers-reduced-motion:reduce){.verse{transition:opacity .4s ease;filter:none;transform:none}}
+</style>
+</head>
+<body class="sealed min-h-screen py-6 px-3 sm:py-12 sm:px-6 flex flex-col items-center justify-center relative">
+
+<div id="envelope" role="dialog" aria-label="Wedding invitation envelope">
+  <p class="env-to" id="envTo"></p>
+  <div class="env">
+    <div class="env-back"></div>
+    <div class="env-letter"><span>Joshwa &amp; Ribeca</span></div>
+    <div class="env-front"></div>
+    <div class="env-flap"></div>
+    <div class="env-edge"></div>
+    <button type="button" class="seal" id="sealBtn" aria-label="Open the invitation">
+      <span class="seal-wax"></span><span class="seal-ring"></span><span class="seal-text">JR</span>
+    </button>
+  </div>
+  <p class="env-hint">Tap the seal to open</p>
+</div>
+
+<main class="w-full max-w-lg arch-card p-3 sm:p-5 my-6">
+  <div class="arch-inner w-full px-5 py-12 sm:px-10 sm:py-16 flex flex-col items-center text-center relative">
+
+
+    <div id="shimmer" class="shimmer" aria-hidden="true"></div>
+    <svg class="w-28 h-28 absolute top-6 -left-4 pointer-events-none opacity-75" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+      <path d="M10 80C25 50 50 30 80 15 65 45 45 65 10 80Z" fill="#a3b19b" opacity=".45"/>
+      <circle cx="40" cy="45" r="14" fill="#fffdfa" stroke="#e6dec8" stroke-width="1.2"/>
+    </svg>
+
+    <figure class="verse mt-6 mb-6" aria-live="polite">
+      <blockquote id="verseText" class="verse-text"></blockquote>
+      <figcaption id="verseRef" class="verse-ref"></figcaption>
+    </figure>
+
+    <p class="text-[11px] sm:text-xs tracking-[.25em] uppercase text-[#7a7064] max-w-xs leading-relaxed mb-6">Together with their families</p>
+
+    <h1 class="couple w-full">
+      <span class="couple-name">Joshwa</span>
+      <span class="couple-and">and</span>
+      <span class="couple-name second">Ribeca</span>
+    </h1>
+
+    <p class="text-[11px] sm:text-xs tracking-[.22em] uppercase text-[#7a7064] mt-6 mb-8 max-w-xs leading-relaxed">Invite you to their wedding celebration</p>
+
+    <div id="guestBadge" class="hidden-el w-full max-w-md border-y border-[#b5945b]/30 py-5 my-2 flex flex-col items-center">
+      <span class="text-[10px] tracking-[.22em] uppercase text-[#7a7064]">With love, we invite</span>
+      <span id="guestName" class="font-script text-3xl sm:text-4xl text-[#8c6d3b] mt-1 leading-snug break-words max-w-full"></span>
+    </div>
+
+    <div class="w-full my-6 flex flex-col items-center">
+      <p class="text-[10px] sm:text-xs tracking-[.25em] uppercase text-[#8c6d3b] font-semibold mb-3">Countdown to forever</p>
+      <div class="grid grid-cols-4 gap-3 w-full max-w-xs" aria-live="off">
+        <div class="bg-[#f4efe6] rounded-xl py-2.5 px-1 border border-[#b5945b]/20"><div id="cdDays" class="text-lg sm:text-xl font-serif-title text-[#8c6d3b] font-semibold">00</div><div class="text-[9px] uppercase tracking-widest text-[#7a7064]">Days</div></div>
+        <div class="bg-[#f4efe6] rounded-xl py-2.5 px-1 border border-[#b5945b]/20"><div id="cdHours" class="text-lg sm:text-xl font-serif-title text-[#8c6d3b] font-semibold">00</div><div class="text-[9px] uppercase tracking-widest text-[#7a7064]">Hours</div></div>
+        <div class="bg-[#f4efe6] rounded-xl py-2.5 px-1 border border-[#b5945b]/20"><div id="cdMins" class="text-lg sm:text-xl font-serif-title text-[#8c6d3b] font-semibold">00</div><div class="text-[9px] uppercase tracking-widest text-[#7a7064]">Mins</div></div>
+        <div class="bg-[#f4efe6] rounded-xl py-2.5 px-1 border border-[#b5945b]/20"><div id="cdSecs" class="text-lg sm:text-xl font-serif-title text-[#8c6d3b] font-semibold">00</div><div class="text-[9px] uppercase tracking-widest text-[#7a7064]">Secs</div></div>
+      </div>
+    </div>
+
+    <div class="w-full mt-4 mb-8">
+      <h2 class="font-script text-3xl sm:text-4xl text-[#8c6d3b] mb-1">Wedding Events</h2>
+      <p class="text-[10px] tracking-[.22em] uppercase text-[#7a7064] mb-5">Celebration schedule</p>
+      <div id="eventsContainer" class="space-y-4 text-left"></div>
+    </div>
+
+    <section id="joinSection" class="w-full relative bg-[#f4efe6]/90 border border-[#b5945b]/30 rounded-[28px] px-5 py-7 sm:px-8 mb-8 overflow-hidden">
+      <h2 class="font-script text-4xl text-[#8c6d3b] leading-tight">RSVP</h2>
+      <p class="font-serif-title italic text-sm text-[#4a4238] mt-1">Will you be there?</p>
+      <p class="text-xs text-[#7a7064] mt-1 mb-5 leading-relaxed">Add your name and let us know you’re coming.</p>
+
+      <form id="rsvpForm" class="flex flex-col items-center gap-3">
+        <label for="rsvpName" class="sr-only">Your name</label>
+        <input type="text" id="rsvpName" required maxlength="60" placeholder="Your name"
+               class="w-full max-w-xs text-center bg-white border border-[#b5945b]/40 rounded-full px-4 py-2.5 text-sm font-serif-title" />
+        <button type="submit" id="rsvpBtn"
+                class="w-full max-w-xs bg-[#8c6d3b] hover:bg-[#73582d] text-white text-sm tracking-wide py-3 rounded-full font-medium transition">Count me in!</button>
+      </form>
+
+      <div id="rsvpDone" class="hidden-el py-2" aria-live="polite">
+        <p id="rsvpDoneTitle" class="font-script text-4xl text-[#8c6d3b]">See you there!</p>
+        <p class="text-xs text-[#7a7064] mt-1">We’ve received your RSVP.</p>
+      </div>
+
+      <div id="petals" class="pointer-events-none absolute inset-0" aria-hidden="true"></div>
+    </section>
+
+    <svg class="w-64 h-24 pointer-events-none opacity-90 mt-2" viewBox="0 0 300 100" fill="none" aria-hidden="true">
+      <path d="M30 80C80 40 220 40 270 80" stroke="#a3b19b" stroke-width="2"/>
+      <circle cx="110" cy="55" r="22" fill="#fffdfa" stroke="#e6dec8" stroke-width="1.5"/><circle cx="110" cy="55" r="7" fill="#eab688"/>
+      <circle cx="150" cy="48" r="26" fill="#fffdfa" stroke="#e6dec8" stroke-width="1.5"/><circle cx="150" cy="48" r="9" fill="#eab688"/>
+      <circle cx="190" cy="55" r="22" fill="#fffdfa" stroke="#e6dec8" stroke-width="1.5"/><circle cx="190" cy="55" r="7" fill="#eab688"/>
+    </svg>
+  </div>
+</main>
+
+<script>
+/* ====== EDIT THESE ====== */
+const CITY = "Lahore";
+const LINK_KEY = "jr-1112";              // must match the key in link-maker.html
+const COUNTDOWN_TARGET = "2026-12-11T19:00:00+05:00"; // Mehndi start, the first event every guest is invited to (Pakistan time)
+const EVENTS = [
+  { id: "m", title: "Mehndi Night", date: "Friday, Dec 11, 2026",   time: "7:00 PM onwards", venue: "Home",
+    maps: "none" },
+  { id: "b", title: "Barat",        date: "Saturday, Dec 12, 2026", time: "1:00 PM onwards", venue: "Awaan Marriage Hall, Kahna, Lahore",
+    maps: "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("Awan Marriage Hall Lahore") + "&query_place_id=ChIJQ9vOTQAHGTkROq1apX3mzS4" },
+  { id: "w", title: "Walimah",      date: "Sunday, Dec 13, 2026",   time: "1:00 PM onwards", venue: "FGA Ground Marquee, Youhanabad, Lahore",
+    maps: "https://maps.app.goo.gl/71aYsw1CRpdZhthd9" }
+];
+// maps: a Google Maps link per venue; "none" hides the map button; empty = search by venue + city.
+// Web app address from your Google Sheet. Guests' names are saved there and shown in the guest list.
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwguzgI4SuDxb37h7m8Jb4jTl5NwK_8p42HNb2toxQ-CidL6uuAWdE2VNPVVZWmau-n/exec";
+/* ======================== */
+
+const $ = id => document.getElementById(id);
+
+// Thin gold line icons (inherit the text color of their row)
+const svgOpen = '<svg class="w-3.5 h-3.5 shrink-0 text-[#b5945b]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+const ICON = {
+  cal:   svgOpen + '<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+  clock: svgOpen + '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+  pinGold: svgOpen + '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>'
+};
+ICON.pin = ICON.pinGold.replace(' text-[#b5945b]', ''); // takes the button's color, turns white on hover
+
+// Personal links carry a sealed code (?i=...). If someone edits the link, the seal breaks
+// and the page falls back to the plain invitation: no name, Mehndi & Walimah only.
+function seal(s) { let h = 5381; for (const c of s + LINK_KEY) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0; return h.toString(36); }
+function readInvite() {
+  try {
+    const raw = new URLSearchParams(location.search).get("i");
+    if (!raw) return null;
+    const [body, sig] = raw.split(".");
+    if (!body || seal(body) !== sig) return null;
+    const d = JSON.parse(decodeURIComponent(escape(atob(body.replace(/-/g, "+").replace(/_/g, "/")))));
+    return { guest: String(d.g || "").slice(0, 60), all: d.e === "all" };
+  } catch (_) { return null; }
+}
+const invite = readInvite() || { guest: "", all: false };
+const guest = invite.guest;
+const visible = EVENTS.filter(e => invite.all || e.id !== "b");
+
+function makeShimmer() {
+  const box = $("shimmer"); if (!box) return;
+  for (let i = 0; i < 42; i++) {
+    const sp = document.createElement("span");
+    const edge = i % 3 !== 0;                       // two thirds hug the sides, the rest scatter
+    const x = edge ? (i % 2 ? 1 + Math.random() * 12 : 87 + Math.random() * 12) : 15 + Math.random() * 70;
+    sp.className = "spark" + (i % 4 === 0 ? " dot" : "");
+    sp.style.left = x + "%";
+    sp.style.top = (3 + Math.random() * 94) + "%";
+    sp.style.setProperty("--s", (i % 4 === 0 ? 4 + Math.random() * 3 : 11 + Math.random() * 11) + "px");
+    sp.style.setProperty("--t", (2.8 + Math.random() * 3) + "s");
+    sp.style.setProperty("--d", (-Math.random() * 5) + "s");
+    sp.style.setProperty("--o", (edge ? .85 + Math.random() * .15 : .55 + Math.random() * .3).toFixed(2));
+    box.appendChild(sp);
+  }
+}
+
+/* Envelope: tap the wax seal, the flap opens, the letter lifts, then the invitation appears */
+function setupEnvelope() {
+  const env = $("envelope"); if (!env) return;
+  document.body.classList.add("sealed");
+  if (guest) $("envTo").innerHTML = "For<b></b>", $("envTo").querySelector("b").textContent = guest;
+  const quick = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  $("sealBtn").addEventListener("click", () => {
+    const at = (ms, fn) => setTimeout(fn, quick ? 0 : ms);
+    env.classList.add("opening");                                  // seal softly fades
+    at(450,  () => env.classList.add("flap"));                     // flap slowly opens
+    at(1500, () => env.classList.add("lifted"));                   // letter glides up
+    at(3000, () => {                                               // envelope drifts away, invitation fades in
+      env.classList.add("leaving", "gone");
+      document.body.classList.remove("sealed");
+      document.querySelector("main").classList.add("reveal");
+      window.scrollTo(0, 0);
+    });
+    at(4700, () => env.remove());
+  }, { once: true });
+}
+
+/* Bible verses on marriage and love (King James Version, public domain). Changes every 15 seconds. */
+const VERSES = [
+  ["Therefore shall a man leave his father and his mother, and shall cleave unto his wife: and they shall be one flesh.", "Genesis 2:24"],
+  ["What therefore God hath joined together, let not man put asunder.", "Mark 10:9"],
+  ["Many waters cannot quench love, neither can the floods drown it.", "Song of Solomon 8:7"],
+  ["A threefold cord is not quickly broken.", "Ecclesiastes 4:12"],
+  ["I found him whom my soul loveth: I held him, and would not let him go.", "Song of Solomon 3:4"],
+  ["Beloved, let us love one another: for love is of God.", "1 John 4:7"],
+  ["Whither thou goest, I will go; and where thou lodgest, I will lodge.", "Ruth 1:16"],
+  ["Whoso findeth a wife findeth a good thing, and obtaineth favour of the LORD.", "Proverbs 18:22"]
+];
+function startVerses() {
+  const box = document.querySelector(".verse"); if (!box) return;
+  let i = 0;
+  const show = n => { $("verseText").textContent = VERSES[n][0]; $("verseRef").textContent = VERSES[n][1]; };
+  show(i);
+  setInterval(() => {
+    box.classList.add("fading");
+    setTimeout(() => { i = (i + 1) % VERSES.length; show(i); box.classList.remove("fading"); }, 1400);
+  }, 15000);
+}
+
+function init() {
+  startVerses();
+  setupEnvelope();
+  makeShimmer();
+  if (guest) { $("guestName").textContent = guest; $("guestBadge").classList.remove("hidden-el"); $("rsvpName").value = guest; }
+
+  visible.forEach((ev, i) => {
+    const url = ev.maps || "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(ev.venue + " " + CITY);
+    const card = document.createElement("div");
+    card.className = "bg-[#f4efe6]/70 border border-[#b5945b]/30 rounded-xl p-4 flex flex-col items-start";
+    const row = 'class="flex items-center gap-2 text-xs mt-1.5"';
+    card.innerHTML =
+      '<div class="font-serif-title text-base sm:text-lg font-semibold"></div>' +
+      '<div ' + row + '>' + ICON.cal + '<span class="text-[#7a7064]"></span></div>' +
+      '<div ' + row + '>' + ICON.clock + '<span class="text-[#7a7064]"></span></div>' +
+      '<div ' + row + '>' + ICON.pinGold + '<span class="font-medium"></span></div>' +
+      '<a target="_blank" rel="noopener noreferrer" class="mt-3 inline-flex items-center gap-1.5 border border-[#8c6d3b] text-[#8c6d3b] hover:bg-[#8c6d3b] hover:text-white transition px-4 py-1.5 rounded-full text-[11px]">' + ICON.pin + '<span>Open location in Google Maps</span></a>';
+    const [t, d, tm, v, a] = card.children;
+    t.textContent = ev.title;
+    d.lastChild.textContent = ev.date;
+    tm.lastChild.textContent = ev.time;
+    v.lastChild.textContent = ev.venue;
+    if (ev.maps === "none") a.remove(); else a.href = url;
+    $("eventsContainer").appendChild(card);
+
+  });
+  if (joinedName()) showJoined(joinedName());
+  startCountdown();
+}
+
+function startCountdown() {
+  const target = new Date(COUNTDOWN_TARGET).getTime();
+  const pad = n => String(n).padStart(2, "0");
+  const tick = () => {
+    const d = Math.max(0, target - Date.now());
+    $("cdDays").textContent = pad(Math.floor(d / 864e5));
+    $("cdHours").textContent = pad(Math.floor(d / 36e5) % 24);
+    $("cdMins").textContent = pad(Math.floor(d / 6e4) % 60);
+    $("cdSecs").textContent = pad(Math.floor(d / 1e3) % 60);
+  };
+  tick(); setInterval(tick, 1000);
+}
+
+/* RSVP: one tap adds the guest's name to the shared guest list */
+function joinedName() { try { return localStorage.getItem("jr-joined") || ""; } catch (_) { return ""; } }
+function showJoined(name) {
+  $("rsvpForm").classList.add("hidden-el");
+  $("rsvpDoneTitle").textContent = "See you there, " + name + "!";
+  $("rsvpDone").classList.remove("hidden-el");
+}
+function petals() {
+  const colors = ["#a3b19b", "#eab688", "#b5945b", "#e6dec8"], box = $("petals");
+  for (let i = 0; i < 28; i++) {
+    const p = document.createElement("span");
+    p.className = "petal";
+    p.style.left = (5 + Math.random() * 90) + "%";
+    p.style.background = colors[i % colors.length];
+    p.style.animationDelay = (Math.random() * 0.6) + "s";
+    p.style.setProperty("--dx", (Math.random() * 80 - 40) + "px");
+    p.style.setProperty("--rot", (Math.random() * 540 - 270) + "deg");
+    box.appendChild(p);
+    setTimeout(() => p.remove(), 3500);
+  }
+}
+
+$("rsvpForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const name = $("rsvpName").value.trim().slice(0, 60);
+  if (!name) return;
+  $("rsvpBtn").disabled = true; $("rsvpBtn").textContent = "Adding you...";
+  try {
+    if (SHEET_URL) {
+      await fetch(SHEET_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({ name, attending: "Joyfully attending", count: "", events: visible.map(v => v.title).join(", "), wishes: "", show: true }) });
+    }
+    try { localStorage.setItem("jr-joined", name); } catch (_) {}
+    showJoined(name);
+    petals();
+  } catch (_) {
+    $("rsvpBtn").disabled = false; $("rsvpBtn").textContent = "No connection. Tap to try again";
+  }
+});
+
+window.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
