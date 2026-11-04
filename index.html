@@ -105,13 +105,21 @@ main.reveal{animation:cardIn 1.8s cubic-bezier(.25,.1,.25,1) both;will-change:op
 main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
 @keyframes cardIn{from{opacity:0;transform:translate3d(0,18px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
 
+/* Waiting for the guest's name: only a soft gold glow shows, then everything fades in together */
+.env-loader{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;opacity:0;pointer-events:none;transition:opacity .5s ease}
+.env-loader span{display:block;width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#e3c27e,#c49a4c 55%,#9c7433);
+  box-shadow:0 0 22px rgba(232,196,110,.55);animation:loaderGlow 1.6s ease-in-out infinite}
+@keyframes loaderGlow{0%,100%{transform:scale(.86);opacity:.55}50%{transform:scale(1);opacity:1}}
+#envelope.env-wait .env-loader{opacity:1;transition-delay:.25s}
+#envelope .env,#envelope .env-hint{transition:opacity .9s ease}
+#envelope.env-wait .env,#envelope.env-wait .env-hint,#envelope.env-wait .env-to{opacity:0;pointer-events:none}
+@media(prefers-reduced-motion:reduce){.env-loader span{animation:none}}
 #envelope{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
   background:radial-gradient(ellipse at 50% 40%,#f7f1e8 0%,#f2ece4 60%,#ebe2d5 100%);padding:16px;transition:opacity 1.6s ease}
 #envelope.gone{opacity:0;pointer-events:none}
 .env-hint{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:1.05rem;color:#7a7064;letter-spacing:.04em;transition:opacity .4s}
 .env-to{transition:opacity .6s ease;font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7a7064;text-align:center;min-height:1.2em;line-height:1.2}
-.env-to.reserve{height:calc(1.2em + 4px + 2.4rem);opacity:0}
-.env-to.reserve.ready{opacity:1}
+.env-to.reserve{height:calc(1.2em + 4px + 2.4rem)}
 .env-to b{display:block;font-family:'Great Vibes',cursive;font-weight:400;font-size:2rem;line-height:1.2;letter-spacing:0;text-transform:none;color:#8c6d3b;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:88vw}
 
 #envelope *,#envelope *::before,#envelope *::after{box-sizing:border-box}
@@ -212,8 +220,15 @@ main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
 <body class="sealed min-h-screen py-6 px-3 sm:py-12 sm:px-6 flex flex-col items-center justify-center relative">
 
 <div id="envelope" role="dialog" aria-label="Wedding invitation envelope">
+  <div class="env-loader" aria-hidden="true"><span></span></div>
   <p class="env-to" id="envTo"></p>
-  <script>if (/[?&]i=[a-f0-9]{16}(&|$)/.test(location.search)) document.getElementById("envTo").classList.add("reserve");</script>
+  <script>
+    // Personal link: keep the envelope hidden until the guest's name has arrived, so they appear together.
+    if (/[?&]i=[a-f0-9]{16}(&|$)/.test(location.search)) {
+      document.getElementById("envTo").classList.add("reserve");
+      document.getElementById("envelope").classList.add("env-wait");
+    }
+  </script>
   <div class="env">
     <div class="env-back"></div>
     <div class="env-letter"><span>Joshwa &amp; Ribeca</span></div>
@@ -510,12 +525,15 @@ function init() {
   showJoined(myNames());
   startCountdown();
   loadGuestList();
+  const showEnvelope = () => { const e = $("envelope"); if (e) e.classList.remove("env-wait"); };
+  setTimeout(showEnvelope, 5000);                 // never keep a guest waiting longer than this
   // 1) a returning guest sees their name instantly from this phone's memory
   const cached = cachedInvite();
   const shownFromCache = useInvite(cached);
-  if (shownFromCache) applyInvite();
+  if (shownFromCache) { applyInvite(); showEnvelope(); }
   // 2) then the sheet confirms it (or switches it off)
   inviteRequest.then(d => {
+    showEnvelope();
     if (d && d.ok === true) {
       useInvite(d); applyInvite(); recordOpen();
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch (_) {}
