@@ -223,10 +223,22 @@ main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
   <div class="env-loader" aria-hidden="true"><span></span></div>
   <p class="env-to" id="envTo"></p>
   <script>
-    // Personal link: keep the envelope hidden until the guest's name has arrived, so they appear together.
+    // Personal link: the name comes inside the link from the Link Maker, so it shows instantly.
+    // (The link code is checked with the Google Sheet right after; an edited name gets corrected.)
+    window.LINK_NAME = (function () {
+      try {
+        var q = new URLSearchParams(location.search), n = q.get("n") || "";
+        if (!/^[a-f0-9]{16}$/.test(q.get("i") || "") || !/^[A-Za-z0-9_-]{1,120}$/.test(n)) return "";
+        var b = atob(n.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((n.length + 3) % 4));
+        var t = new TextDecoder().decode(Uint8Array.from(b, function (c) { return c.charCodeAt(0); }));
+        return t.replace(/[\u0000-\u001f\u007f<>]/g, "").replace(/\s+/g, " ").trim().slice(0, 60);
+      } catch (e) { return ""; }
+    })();
     if (/[?&]i=[a-f0-9]{16}(&|$)/.test(location.search)) {
-      document.getElementById("envTo").classList.add("reserve");
-      document.getElementById("envelope").classList.add("env-wait");
+      var to = document.getElementById("envTo");
+      to.classList.add("reserve");
+      if (window.LINK_NAME) { to.innerHTML = "For<b></b>"; to.querySelector("b").textContent = window.LINK_NAME; to.classList.add("ready"); }
+      else document.getElementById("envelope").classList.add("env-wait");   // older links: wait for the sheet
     }
   </script>
   <div class="env">
@@ -539,7 +551,7 @@ function init() {
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch (_) {}
     } else if (d && d.ok === false) {
       try { localStorage.removeItem(CACHE_KEY); } catch (_) {}
-      if (shownFromCache) resetInvite();
+      if (shownFromCache || window.LINK_NAME) resetInvite();
     }
   });
 }
