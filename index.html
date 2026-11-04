@@ -271,6 +271,7 @@ main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
       <p class="font-serif-title italic text-sm text-[#4a4238] mt-1">Will you be there?</p>
       <p id="rsvpIntro" class="text-xs text-[#7a7064] mt-1 mb-5 leading-relaxed">Add your name and celebrate with us.<br>Your name will appear on this invitation for everyone to see.</p>
 
+      <p id="rsvpLocked" class="hidden-el text-xs text-[#7a7064] mt-2 mb-1 leading-relaxed"></p>
       <form id="rsvpForm" class="flex flex-col items-center gap-3">
         <label for="rsvpName" class="sr-only">Your name</label>
         <input type="text" id="rsvpName" required maxlength="60" placeholder="Your name"
@@ -307,16 +308,14 @@ main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
 <script>
 /* ====== EDIT THESE ====== */
 const CITY = "Lahore";
-const LINK_KEY = "jr-1112";              // must match the key in link-maker.html
 const COUNTDOWN_TARGET = "2026-12-11T14:00:00+05:00"; // 11 Dec 2026, 2:00 PM Pakistan time (+05:00), the same moment for guests anywhere
 const EVENTS = [
   { id: "m", start: "2026-12-11T19:00:00+05:00", title: "Grand Dholki", date: "Friday, Dec 11, 2026",   time: "7:00 PM onwards", venue: "Home",
     maps: "none" },
-  { id: "b", start: "2026-12-12T13:00:00+05:00", title: "Barat",        date: "Saturday, Dec 12, 2026", time: "1:00 PM onwards", venue: "Awaan Marriage Hall,\nLahore",
-    maps: "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("Awan Marriage Hall Lahore") + "&query_place_id=ChIJQ9vOTQAHGTkROq1apX3mzS4" },
   { id: "w", start: "2026-12-13T13:00:00+05:00", title: "Walimah",      date: "Sunday, Dec 13, 2026",   time: "1:00 PM onwards", venue: "FGA Ground Marquee,\nYouhanabad, Lahore",
     maps: "https://maps.app.goo.gl/71aYsw1CRpdZhthd9" }
 ];
+// Barat is not listed here on purpose: its details come from your Google Sheet, only for all-events links.
 // maps: a Google Maps link per venue; "none" hides the map button; empty = search by venue + city.
 // Web app address from your Google Sheet. Guests' names are saved there and shown in the guest list.
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbwguzgI4SuDxb37h7m8Jb4jTl5NwK_8p42HNb2toxQ-CidL6uuAWdE2VNPVVZWmau-n/exec";
@@ -334,53 +333,55 @@ const ICON = {
 ICON.pin = ICON.pinGold.replace(' text-[#b5945b]', ''); // takes the button's color, turns white on hover
 ICON.calBtn = ICON.cal.replace(' text-[#b5945b]', '');
 
-// Formal invitation wording, e.g. "Friday, 11 December 2026" and "at seven o'clock in the evening"
-function pk(d) { return new Date(d.getTime() + 5 * 36e5); }   // shift to Pakistan time, read with UTC getters
-function formalDate(d) {
-  const t = pk(d), days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
-        months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  return days[t.getUTCDay()] + ", " + t.getUTCDate() + " " + months[t.getUTCMonth()] + " " + t.getUTCFullYear();
-}
-function formalTime(d) {
-  const t = pk(d), h = t.getUTCHours(), m = t.getUTCMinutes(),
-        words = ["twelve","one","two","three","four","five","six","seven","eight","nine","ten","eleven"];
-  const part = h < 12 ? "in the morning" : h < 17 ? "in the afternoon" : "in the evening";
-  return m ? "at " + (h % 12 || 12) + ":" + String(m).padStart(2, "0") + " " + part : "at " + words[h % 12] + " o’clock " + part;
-}
+// Personal links look like ?i=1a2b3c4d5e6f7a8b. The code is random and is checked against the private
+// Links tab in your Google Sheet, so a link can't be guessed, edited or forged. A missing or unknown
+// code shows the plain invitation (Grand Dholki & Walimah, no name, no RSVP).
+const LINK_ID = (() => { const v = new URLSearchParams(location.search).get("i") || ""; return /^[a-f0-9]{16}$/.test(v) ? v : ""; })();
+let invite = { ok: false, guest: "", all: false };
+let guest = "";
+let visible = EVENTS.slice();
 
-// "Add to calendar": Google Calendar link and an .ics file (iPhone, Outlook). Times are Pakistan time.
-function calLinks(ev) {
-  const start = new Date(ev.start), end = new Date(start.getTime() + 4 * 36e5);
-  const z = d => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
-  const title = ev.title + " | Joshwa & Ribeca's Wedding";
-  const place = ev.venue === "Home" ? "Home" : ev.venue;
-  const google = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(title) +
-    "&dates=" + z(start) + "/" + z(end) + "&location=" + encodeURIComponent(place) +
-    "&details=" + encodeURIComponent("Joshwa & Ribeca's wedding celebration") + "&ctz=Asia/Karachi";
-  const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//JR Wedding//EN", "BEGIN:VEVENT",
-    "UID:" + ev.id + "-jr-2026@wedding", "DTSTAMP:" + z(new Date()), "DTSTART:" + z(start), "DTEND:" + z(end),
-    "SUMMARY:" + title.replace(/([,;])/g, "\\$1"), "LOCATION:" + place.replace(/([,;])/g, "\\$1"),
-    "BEGIN:VALARM", "TRIGGER:-P1D", "ACTION:DISPLAY", "DESCRIPTION:Reminder", "END:VALARM",
-    "END:VEVENT", "END:VCALENDAR"].join("\r\n");
-  return { google, ics: "data:text/calendar;charset=utf-8," + encodeURIComponent(ics) };
+// Only accept the fields we expect from the sheet, and only https map links.
+function safeEvent(x) {
+  if (!x || typeof x !== "object") return null;
+  const t = k => String(x[k] == null ? "" : x[k]).slice(0, 120);
+  const maps = /^https:\/\//.test(t("maps")) ? t("maps") : "none";
+  return { id: t("id").replace(/[^a-z]/g, "").slice(0, 4), start: t("start"), title: t("title"), date: t("date"), time: t("time"), venue: t("venue"), maps };
 }
-
-// Personal links carry a sealed code (?i=...). If someone edits the link, the seal breaks
-// and the page falls back to the plain invitation: no name, Grand Dholki & Walimah only.
-function seal(s) { let h = 5381; for (const c of s + LINK_KEY) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0; return h.toString(36); }
-function readInvite() {
-  try {
-    const raw = new URLSearchParams(location.search).get("i");
-    if (!raw) return null;
-    const [body, sig] = raw.split(".");
-    if (!body || seal(body) !== sig) return null;
-    const d = JSON.parse(decodeURIComponent(escape(atob(body.replace(/-/g, "+").replace(/_/g, "/")))));
-    return { guest: String(d.g || "").slice(0, 60), all: d.e === "all" };
-  } catch (_) { return null; }
+function loadInvite() {
+  if (!LINK_ID || !SHEET_URL) return Promise.resolve(false);
+  return fetch(SHEET_URL + "?action=invite&id=" + LINK_ID + "&t=" + Date.now())
+    .then(r => r.json())
+    .then(d => {
+      if (!d || d.ok !== true) return false;
+      invite = { ok: true, guest: String(d.g || "").slice(0, 60), all: d.e === "all" };
+      const extra = (Array.isArray(d.extra) ? d.extra : []).map(safeEvent).filter(Boolean);
+      visible = EVENTS.concat(extra).sort((a, b) => Date.parse(a.start) - Date.parse(b.start));
+      return true;
+    })
+    .catch(() => false);
 }
-const invite = readInvite() || { guest: "", all: false };
-const guest = invite.guest;
-const visible = EVENTS.filter(e => invite.all || e.id !== "b");
+function applyInvite() {
+  guest = invite.guest;
+  if (guest) {
+    if ($("envTo")) { $("envTo").innerHTML = "For<b></b>"; $("envTo").querySelector("b").textContent = guest; }
+    $("guestName").textContent = guest; $("guestBadge").classList.remove("hidden-el");
+    if (!myNames().length && !$("rsvpName").value) $("rsvpName").value = guest;
+  }
+  renderEvents();
+  rsvpAccess();
+}
+// RSVP only works from a valid personal link, so strangers can't add names.
+function rsvpAccess() {
+  const ok = invite.ok;
+  $("rsvpForm").classList.toggle("hidden-el", !ok);
+  $("rsvpLocked").classList.toggle("hidden-el", ok);
+  $("rsvpLocked").textContent = LINK_ID
+    ? "This invitation link isn't active. Please ask Joshwa or Ribeca for your link."
+    : "Please open your personal invitation link to RSVP.";
+  if (!ok) $("rsvpIntro").classList.add("hidden-el");
+  else if (!myNames().length) $("rsvpIntro").classList.remove("hidden-el");
+}
 
 function makeShimmer() {
   const box = $("shimmer"); if (!box) return;
@@ -403,7 +404,6 @@ function makeShimmer() {
 function setupEnvelope() {
   const env = $("envelope"); if (!env) return;
   document.body.classList.add("sealed");
-  if (guest) $("envTo").innerHTML = "For<b></b>", $("envTo").querySelector("b").textContent = guest;
   const quick = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   $("sealBtn").addEventListener("click", () => {
     const at = (ms, fn) => setTimeout(fn, quick ? 0 : ms);
@@ -491,8 +491,16 @@ function init() {
   startVerses();
   setupEnvelope();
   makeShimmer();
-  if (guest) { $("guestName").textContent = guest; $("guestBadge").classList.remove("hidden-el"); $("rsvpName").value = guest; }
+  renderEvents();
+  rsvpAccess();
+  showJoined(myNames());
+  startCountdown();
+  loadGuestList();
+  loadInvite().then(ok => { if (ok) applyInvite(); });
+}
 
+function renderEvents() {
+  $("eventsContainer").innerHTML = "";
   visible.forEach((ev, i) => {
     const url = ev.maps || "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(ev.venue + " " + CITY);
     const card = document.createElement("div");
@@ -519,11 +527,7 @@ function init() {
     if (EV_ART[ev.id]) card.insertAdjacentHTML("beforeend", EV_ART[ev.id]);
     if (ev.id === "b") card.classList.add("flip");   // Barat mirrored for a zig-zag look
     $("eventsContainer").appendChild(card);
-
   });
-  showJoined(myNames());
-  startCountdown();
-  loadGuestList();
 }
 
 // Real time: the countdown uses the server's clock, so it stays correct even if a guest's phone clock is wrong.
@@ -580,7 +584,7 @@ function showGuestList(names, highlight) {
 }
 function loadGuestList() {
   if (!SHEET_URL) return;
-  fetch(SHEET_URL + "?t=" + Date.now())
+  fetch(SHEET_URL + "?action=names&t=" + Date.now())
     .then(r => r.json())
     .then(d => { if (!Array.isArray(d.names)) return; lastNames = d.names.map(n => String(n).slice(0, 60)); showGuestList(lastNames, myNames()); })
     .catch(() => {});
@@ -624,12 +628,12 @@ function petals() {
 $("rsvpForm").addEventListener("submit", async e => {
   e.preventDefault();
   const name = $("rsvpName").value.trim().slice(0, 60);
-  if (!name) return;
+  if (name.length < 2 || !invite.ok) return;
   $("rsvpBtn").disabled = true; $("rsvpBtn").textContent = "Adding you...";
   try {
     if (SHEET_URL) {
       await fetch(SHEET_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({ name, attending: "Joyfully attending", count: "", events: visible.map(v => v.title).join(", "), wishes: "", show: true }) });
+        body: JSON.stringify({ id: LINK_ID, name }) });
     }
     const mine = myNames().filter(n => n.toLowerCase() !== name.toLowerCase()).concat(name);
     saveMine(mine);
