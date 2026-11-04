@@ -15,6 +15,8 @@
 <meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500;600&family=Pinyon+Script&display=swap" rel="stylesheet">
@@ -107,8 +109,10 @@ main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
   background:radial-gradient(ellipse at 50% 40%,#f7f1e8 0%,#f2ece4 60%,#ebe2d5 100%);padding:16px;transition:opacity 1.6s ease}
 #envelope.gone{opacity:0;pointer-events:none}
 .env-hint{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:1.05rem;color:#7a7064;letter-spacing:.04em;transition:opacity .4s}
-.env-to{transition:opacity .4s;font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7a7064;text-align:center;min-height:1.2em}
-.env-to b{display:block;font-family:'Great Vibes',cursive;font-weight:400;font-size:2rem;letter-spacing:0;text-transform:none;color:#8c6d3b;margin-top:4px}
+.env-to{transition:opacity .6s ease;font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7a7064;text-align:center;min-height:1.2em;line-height:1.2}
+.env-to.reserve{height:calc(1.2em + 4px + 2.4rem);opacity:0}
+.env-to.reserve.ready{opacity:1}
+.env-to b{display:block;font-family:'Great Vibes',cursive;font-weight:400;font-size:2rem;line-height:1.2;letter-spacing:0;text-transform:none;color:#8c6d3b;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:88vw}
 
 #envelope *,#envelope *::before,#envelope *::after{box-sizing:border-box}
 .env{position:relative;width:min(68vw,290px);aspect-ratio:.7/1;perspective:1600px;transition:transform 1.4s cubic-bezier(.4,0,.2,1),opacity 1.4s ease}
@@ -209,6 +213,7 @@ main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
 
 <div id="envelope" role="dialog" aria-label="Wedding invitation envelope">
   <p class="env-to" id="envTo"></p>
+  <script>if (/[?&]i=[a-f0-9]{16}(&|$)/.test(location.search)) document.getElementById("envTo").classList.add("reserve");</script>
   <div class="env">
     <div class="env-back"></div>
     <div class="env-letter"><span>Joshwa &amp; Ribeca</span></div>
@@ -347,23 +352,33 @@ function safeEvent(x) {
   const maps = /^https:\/\//.test(t("maps")) ? t("maps") : "none";
   return { id: t("id").replace(/[^a-z]/g, "").slice(0, 4), start: t("start"), title: t("title"), date: t("date"), time: t("time"), venue: t("venue"), maps };
 }
-function loadInvite() {
-  if (!LINK_ID || !SHEET_URL) return Promise.resolve(false);
-  return fetch(SHEET_URL + "?action=invite&id=" + LINK_ID + "&t=" + Date.now())
-    .then(r => r.json())
-    .then(d => {
-      if (!d || d.ok !== true) return false;
-      invite = { ok: true, guest: String(d.g || "").slice(0, 60), all: d.e === "all" };
-      const extra = (Array.isArray(d.extra) ? d.extra : []).map(safeEvent).filter(Boolean);
-      visible = EVENTS.concat(extra).sort((a, b) => Date.parse(a.start) - Date.parse(b.start));
-      return true;
-    })
-    .catch(() => false);
+function useInvite(d) {
+  if (!d || d.ok !== true) return false;
+  invite = { ok: true, guest: String(d.g || "").slice(0, 60), all: d.e === "all" };
+  const extra = (Array.isArray(d.extra) ? d.extra : []).map(safeEvent).filter(Boolean);
+  visible = EVENTS.concat(extra).sort((a, b) => Date.parse(a.start) - Date.parse(b.start));
+  return true;
+}
+const CACHE_KEY = "jr-inv-" + LINK_ID;
+function cachedInvite() { try { return JSON.parse(localStorage.getItem(CACHE_KEY) || "null"); } catch (_) { return null; } }
+// Asked as soon as the page script starts, not after everything else has loaded.
+const inviteRequest = (LINK_ID && SHEET_URL)
+  ? fetch(SHEET_URL + "?action=invite&id=" + LINK_ID + "&t=" + Date.now()).then(r => r.json()).catch(() => null)
+  : Promise.resolve(null);
+function recordOpen() {
+  if (!LINK_ID || !SHEET_URL) return;
+  try { fetch(SHEET_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "open", id: LINK_ID }) }); } catch (_) {}
+}
+function resetInvite() {
+  invite = { ok: false, guest: "", all: false }; guest = ""; visible = EVENTS.slice();
+  if ($("envTo")) { $("envTo").textContent = ""; $("envTo").classList.remove("ready"); }
+  $("guestBadge").classList.add("hidden-el");
+  renderEvents(); rsvpAccess();
 }
 function applyInvite() {
   guest = invite.guest;
   if (guest) {
-    if ($("envTo")) { $("envTo").innerHTML = "For<b></b>"; $("envTo").querySelector("b").textContent = guest; }
+    if ($("envTo")) { $("envTo").innerHTML = "For<b></b>"; $("envTo").querySelector("b").textContent = guest; $("envTo").classList.add("ready"); }
     $("guestName").textContent = guest; $("guestBadge").classList.remove("hidden-el");
     if (!myNames().length && !$("rsvpName").value) $("rsvpName").value = guest;
   }
@@ -495,7 +510,20 @@ function init() {
   showJoined(myNames());
   startCountdown();
   loadGuestList();
-  loadInvite().then(ok => { if (ok) applyInvite(); });
+  // 1) a returning guest sees their name instantly from this phone's memory
+  const cached = cachedInvite();
+  const shownFromCache = useInvite(cached);
+  if (shownFromCache) applyInvite();
+  // 2) then the sheet confirms it (or switches it off)
+  inviteRequest.then(d => {
+    if (d && d.ok === true) {
+      useInvite(d); applyInvite(); recordOpen();
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch (_) {}
+    } else if (d && d.ok === false) {
+      try { localStorage.removeItem(CACHE_KEY); } catch (_) {}
+      if (shownFromCache) resetInvite();
+    }
+  });
 }
 
 // Drawings only animate while their card is on screen (saves the phone a lot of work).
