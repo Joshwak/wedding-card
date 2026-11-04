@@ -117,10 +117,21 @@ main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
 #envelope{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
   background:radial-gradient(ellipse at 50% 40%,#f7f1e8 0%,#f2ece4 60%,#ebe2d5 100%);padding:16px;transition:opacity 1.6s ease}
 #envelope.gone{opacity:0;pointer-events:none}
+/* Invalid or missing link: the envelope is replaced by a short message and never opens */
+#envelope.invalid .env,#envelope.invalid .env-hint,#envelope.invalid .env-to,#envelope.invalid .env-loader{display:none}
+.env-invalid{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;max-width:20rem;animation:fadeUp .8s ease both}
+.env-invalid[hidden]{display:none}
+.inv-seal{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:6px;
+  background:radial-gradient(circle at 35% 30%,#e3c27e 0%,#c49a4c 38%,#9c7433 72%,#7f5c27 100%);color:#f6e5bd;font-family:'Great Vibes',cursive;font-size:1.7rem;
+  box-shadow:0 6px 14px rgba(90,62,20,.3),inset 0 -4px 8px rgba(70,45,10,.3)}
+.inv-title{font-family:'Playfair Display',serif;font-weight:400;font-size:1.25rem;color:#4a4238;margin:0}
+.inv-text{font-size:13px;line-height:1.55;color:#7a7064;margin:0}
+.inv-retry{margin-top:6px;font:inherit;font-size:13px;color:#8c6d3b;background:transparent;border:1px solid #8c6d3b;border-radius:999px;padding:8px 18px;cursor:pointer}
+.env-hint.waiting{animation:fadeUp .4s ease both}
 .env-hint{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:1.05rem;color:#7a7064;letter-spacing:.04em;transition:opacity .4s}
-.env-to{transition:opacity .6s ease;font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7a7064;text-align:center;min-height:1.2em;line-height:1.2}
-.env-to.reserve{height:calc(1.2em + 4px + 2.4rem)}
-.env-to b{display:block;font-family:'Great Vibes',cursive;font-weight:400;font-size:2rem;line-height:1.2;letter-spacing:0;text-transform:none;color:#8c6d3b;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:88vw}
+.env-to{transition:opacity .6s ease;font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7a7064;text-align:center;min-height:1.2em;line-height:1.2;max-width:min(92vw,560px);overflow:visible}
+.env-to.reserve{min-height:calc(1.2em + 4px + 2.4rem)}
+.env-to b{display:block;font-family:'Great Vibes',cursive;font-weight:400;font-size:2rem;line-height:1.2;letter-spacing:0;text-transform:none;color:#8c6d3b;margin-top:4px;padding:0 .2em;overflow:visible;overflow-wrap:anywhere;text-wrap:balance}
 
 #envelope *,#envelope *::before,#envelope *::after{box-sizing:border-box}
 .env{position:relative;width:min(68vw,290px);aspect-ratio:.7/1;perspective:1600px;transition:transform 1.4s cubic-bezier(.4,0,.2,1),opacity 1.4s ease}
@@ -234,7 +245,9 @@ main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
         return t.replace(/[\u0000-\u001f\u007f<>]/g, "").replace(/\s+/g, " ").trim().slice(0, 60);
       } catch (e) { return ""; }
     })();
-    if (/[?&]i=[a-f0-9]{16}(&|$)/.test(location.search)) {
+    if (!/[?&]i=[a-f0-9]{16}(&|$)/.test(location.search)) {
+      document.getElementById("envelope").classList.add("invalid");   // not a Link Maker link: nothing opens
+    } else {
       var to = document.getElementById("envTo");
       to.classList.add("reserve");
       if (window.LINK_NAME) { to.innerHTML = "For<b></b>"; to.querySelector("b").textContent = window.LINK_NAME; to.classList.add("ready"); }
@@ -251,7 +264,13 @@ main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
       <span class="seal-wax"></span><span class="seal-ring"></span><span class="seal-text">JR</span>
     </button>
   </div>
-  <p class="env-hint">Tap the seal to open</p>
+  <p class="env-hint" id="envHint">Tap the seal to open</p>
+  <div class="env-invalid" id="envInvalid" hidden>
+    <div class="inv-seal" aria-hidden="true">JR</div>
+    <h1 class="inv-title">This invitation link isn't valid</h1>
+    <p class="inv-text" id="envInvalidText">Please open the personal link Joshwa &amp; Ribeca sent you.</p>
+    <button type="button" class="inv-retry" id="envRetry" hidden>Try again</button>
+  </div>
 </div>
 
 <main class="w-full max-w-lg arch-card p-3 sm:p-5 my-6">
@@ -340,13 +359,7 @@ main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
 /* ====== EDIT THESE ====== */
 const CITY = "Lahore";
 const COUNTDOWN_TARGET = "2026-12-11T14:00:00+05:00"; // 11 Dec 2026, 2:00 PM Pakistan time (+05:00), the same moment for guests anywhere
-const EVENTS = [
-  { id: "m", start: "2026-12-11T19:00:00+05:00", title: "Grand Dholki", date: "Friday, Dec 11, 2026",   time: "7:00 PM onwards", venue: "Home",
-    maps: "none" },
-  { id: "w", start: "2026-12-13T13:00:00+05:00", title: "Walimah",      date: "Sunday, Dec 13, 2026",   time: "1:00 PM onwards", venue: "FGA Ground Marquee,\nYouhanabad, Lahore",
-    maps: "https://maps.app.goo.gl/71aYsw1CRpdZhthd9" }
-];
-// Barat is not listed here on purpose: its details come from your Google Sheet, only for all-events links.
+const EVENTS = [];   // event details come from your Google Sheet, only for valid links
 // maps: a Google Maps link per venue; "none" hides the map button; empty = search by venue + city.
 // Web app address from your Google Sheet. Guests' names are saved there and shown in the guest list.
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbwguzgI4SuDxb37h7m8Jb4jTl5NwK_8p42HNb2toxQ-CidL6uuAWdE2VNPVVZWmau-n/exec";
@@ -366,7 +379,7 @@ ICON.calBtn = ICON.cal.replace(' text-[#b5945b]', '');
 
 // Personal links look like ?i=1a2b3c4d5e6f7a8b. The code is random and is checked against the private
 // Links tab in your Google Sheet, so a link can't be guessed, edited or forged. A missing or unknown
-// code shows the plain invitation (Grand Dholki & Walimah, no name, no RSVP).
+// code shows a "not valid" message and the invitation never opens.
 const LINK_ID = (() => { const v = new URLSearchParams(location.search).get("i") || ""; return /^[a-f0-9]{16}$/.test(v) ? v : ""; })();
 let invite = { ok: false, guest: "", all: false };
 let guest = "";
@@ -382,8 +395,8 @@ function safeEvent(x) {
 function useInvite(d) {
   if (!d || d.ok !== true) return false;
   invite = { ok: true, guest: String(d.g || "").slice(0, 60), all: d.e === "all" };
-  const extra = (Array.isArray(d.extra) ? d.extra : []).map(safeEvent).filter(Boolean);
-  visible = EVENTS.concat(extra).sort((a, b) => Date.parse(a.start) - Date.parse(b.start));
+  const list = Array.isArray(d.events) ? d.events : (Array.isArray(d.extra) ? d.extra : []);
+  visible = list.map(safeEvent).filter(Boolean).sort((a, b) => Date.parse(a.start) - Date.parse(b.start));
   return true;
 }
 const CACHE_KEY = "jr-inv-" + LINK_ID;
@@ -442,12 +455,34 @@ function makeShimmer() {
 }
 
 /* Envelope: tap the wax seal, the flap opens, the letter lifts, then the invitation appears */
+// Show the "not valid" message instead of the envelope; the invitation can never open.
+function blockInvitation(offline) {
+  const env = $("envelope"); if (!env) { document.body.innerHTML = ""; location.replace(location.pathname); return; }
+  env.classList.add("invalid"); env.classList.remove("env-wait");
+  $("envInvalid").hidden = false;
+  if (offline) {
+    env.querySelector(".inv-title").textContent = "Couldn't open your invitation";
+    $("envInvalidText").textContent = "Please check your internet connection and try again.";
+    $("envRetry").hidden = false; $("envRetry").onclick = () => location.reload();
+  }
+}
+let wantsOpen = false;   // guest tapped the seal before the sheet answered
 function setupEnvelope() {
   const env = $("envelope"); if (!env) return;
   document.body.classList.add("sealed");
+  if (env.classList.contains("invalid")) { $("envInvalid").hidden = false; return; }
   const quick = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   $("sealBtn").addEventListener("click", () => {
+    if (!invite.ok) {                                              // not confirmed yet: open as soon as it is
+      wantsOpen = true; $("envHint").textContent = "Opening your invitation..."; $("envHint").classList.add("waiting");
+      return;
+    }
+    window.openEnvelope();
+  });
+  window.openEnvelope = () => {
+    if (env.dataset.opened) return; env.dataset.opened = "1";
     const at = (ms, fn) => setTimeout(fn, quick ? 0 : ms);
+    $("envHint").textContent = "Tap the seal to open";
     env.classList.add("opening");                                  // seal softly fades
     at(450,  () => env.classList.add("flap"));                     // flap slowly opens
     at(1500, () => env.classList.add("lifted"));                   // letter glides up
@@ -457,7 +492,7 @@ function setupEnvelope() {
       window.scrollTo(0, 0);
     });
     at(4700, () => { env.remove(); document.body.classList.remove("sealed"); });   // tidy up once the envelope has gone
-  }, { once: true });
+  };
 }
 
 /* Bible verses on marriage and love (King James Version, public domain). Changes every 15 seconds. */
@@ -536,22 +571,25 @@ function init() {
   rsvpAccess();
   showJoined(myNames());
   startCountdown();
-  loadGuestList();
   const showEnvelope = () => { const e = $("envelope"); if (e) e.classList.remove("env-wait"); };
-  setTimeout(showEnvelope, 5000);                 // never keep a guest waiting longer than this
+  setTimeout(() => { if (!invite.ok && $("envelope") && $("envelope").classList.contains("env-wait")) showEnvelope(); }, 5000);
   // 1) a returning guest sees their name instantly from this phone's memory
   const cached = cachedInvite();
   const shownFromCache = useInvite(cached);
   if (shownFromCache) { applyInvite(); showEnvelope(); }
   // 2) then the sheet confirms it (or switches it off)
+  if (!LINK_ID) return;                            // no code: the "not valid" message is already showing
   inviteRequest.then(d => {
     showEnvelope();
     if (d && d.ok === true) {
-      useInvite(d); applyInvite(); recordOpen();
+      useInvite(d); applyInvite(); recordOpen(); loadGuestList();
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch (_) {}
-    } else if (d && d.ok === false) {
+      if (wantsOpen) window.openEnvelope && window.openEnvelope();
+    } else if (d && d.ok === false) {               // made-up, edited or switched-off link
       try { localStorage.removeItem(CACHE_KEY); } catch (_) {}
-      if (shownFromCache || window.LINK_NAME) resetInvite();
+      resetInvite(); blockInvitation(false);
+    } else if (!shownFromCache) {                   // no answer (offline): offer to try again
+      blockInvitation(true);
     }
   });
 }
@@ -645,8 +683,8 @@ function showGuestList(names, highlight) {
   $("whoComing").classList.remove("hidden-el");
 }
 function loadGuestList() {
-  if (!SHEET_URL) return;
-  fetch(SHEET_URL + "?action=names&t=" + Date.now())
+  if (!SHEET_URL || !invite.ok) return;
+  fetch(SHEET_URL + "?action=names&id=" + LINK_ID + "&t=" + Date.now())
     .then(r => r.json())
     .then(d => { if (!Array.isArray(d.names)) return; lastNames = d.names.map(n => String(n).slice(0, 60)); showGuestList(lastNames, myNames()); })
     .catch(() => {});
