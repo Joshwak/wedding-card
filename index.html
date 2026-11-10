@@ -101,7 +101,7 @@ body.sealed main{opacity:0;will-change:opacity,transform}
 body.sealed .spark,body.sealed .arch-card::after{animation-play-state:paused}
 #envelope{will-change:opacity}
 body.sealed .couple-name,body.sealed .couple-and{animation-play-state:paused}
-main.reveal{animation:cardIn 1.6s cubic-bezier(.25,.1,.25,1) both;will-change:opacity,transform}
+main.reveal{animation:cardIn 1.3s cubic-bezier(.25,.1,.25,1) both;will-change:opacity,transform}
 main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
 @keyframes cardIn{from{opacity:0;transform:translate3d(0,18px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
 
@@ -111,11 +111,11 @@ main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
   box-shadow:0 0 22px rgba(232,196,110,.55);animation:loaderGlow 1.6s ease-in-out infinite}
 @keyframes loaderGlow{0%,100%{transform:scale(.86);opacity:.55}50%{transform:scale(1);opacity:1}}
 #envelope.env-wait .env-loader{opacity:1;transition-delay:.25s}
-#envelope .env,#envelope .env-hint{transition:opacity .9s ease}
+#envelope .env,#envelope .env-hint{transition:opacity .5s ease}
 #envelope.env-wait .env,#envelope.env-wait .env-hint,#envelope.env-wait .env-to{opacity:0;pointer-events:none}
 @media(prefers-reduced-motion:reduce){.env-loader span{animation:none}}
 #envelope{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
-  background:radial-gradient(ellipse at 50% 40%,#f7f1e8 0%,#f2ece4 60%,#ebe2d5 100%);padding:16px;transition:opacity .9s ease}
+  background:radial-gradient(ellipse at 50% 40%,#f7f1e8 0%,#f2ece4 60%,#ebe2d5 100%);padding:16px;transition:opacity .5s ease}
 #envelope.gone{opacity:0;pointer-events:none}
 /* Invalid or missing link: the envelope is replaced by a short message and never opens */
 #envelope.invalid .env,#envelope.invalid .env-hint,#envelope.invalid .env-to,#envelope.invalid .env-loader{display:none}
@@ -137,18 +137,18 @@ main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
 .env{position:relative;width:min(68vw,290px);aspect-ratio:.7/1;perspective:1600px;transition:transform 1.4s cubic-bezier(.4,0,.2,1),opacity 1.4s ease}
 .env-back{position:absolute;inset:0;background:#e6dccd;border-radius:10px;box-shadow:0 24px 50px rgba(74,66,56,.18),0 2px 6px rgba(74,66,56,.08)}
 .env-letter{position:absolute;left:7%;right:7%;top:5%;height:90%;background:#fbf9f5;border-radius:8px;border:1px solid rgba(181,148,91,.3);
-  display:flex;align-items:flex-start;justify-content:center;padding-top:16%;transition:transform 1.6s cubic-bezier(.45,0,.2,1);z-index:1}
+  display:flex;align-items:flex-start;justify-content:center;padding-top:16%;transition:transform .9s cubic-bezier(.45,0,.2,1);z-index:1}
 .env-letter span{font-family:'Great Vibes',cursive;font-size:clamp(1.6rem,7vw,2.2rem);color:#8c6d3b}
 .env-front{position:absolute;inset:0;z-index:2;border-radius:10px;overflow:hidden;pointer-events:none}
 .env-front::before{content:"";position:absolute;inset:0;background:#efe6da;clip-path:polygon(0 0,50% 48%,100% 0,100% 100%,0 100%)}
 .env-front::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#f4ece1,#ece2d4);clip-path:polygon(0 100%,50% 58%,100% 100%)}
-.env-flap{position:absolute;left:0;right:0;top:0;height:48%;z-index:3;transform-origin:50% 0;transition:transform 1.3s cubic-bezier(.45,0,.25,1),z-index 0s .65s}
+.env-flap{position:absolute;left:0;right:0;top:0;height:48%;z-index:3;transform-origin:50% 0;transition:transform .8s cubic-bezier(.45,0,.25,1),z-index 0s .4s}
 .env-flap::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#e9dfd0,#f1e9dd);clip-path:polygon(0 0,100% 0,50% 100%);
   filter:drop-shadow(0 3px 3px rgba(74,66,56,.12))}
 .env-edge{position:absolute;inset:0;z-index:2;border-radius:10px;border:1px solid rgba(181,148,91,.28);pointer-events:none}
 
 .seal{position:absolute;left:50%;top:48%;width:80px;height:80px;transform:translate(-50%,-50%);z-index:4;border:0;padding:0;cursor:pointer;background:none;
-  transition:transform .9s ease,opacity .9s ease;-webkit-tap-highlight-color:transparent}
+  transition:transform .5s ease,opacity .5s ease;-webkit-tap-highlight-color:transparent}
 .seal-wax{position:absolute;inset:0;border-radius:47% 53% 50% 50% / 52% 48% 52% 48%;
   background:radial-gradient(circle at 35% 30%,#e3c27e 0%,#c49a4c 38%,#9c7433 72%,#7f5c27 100%);
   box-shadow:0 6px 14px rgba(90,62,20,.35),inset 0 -4px 8px rgba(70,45,10,.35),inset 0 3px 6px rgba(255,240,200,.35)}
@@ -484,15 +484,15 @@ function setupEnvelope() {
     const at = (ms, fn) => setTimeout(fn, quick ? 0 : ms);
     $("envHint").textContent = "Tap the seal to open";
     env.classList.add("opening");                                  // seal softly fades
-    at(450,  () => env.classList.add("flap"));                     // flap slowly opens
-    at(1500, () => env.classList.add("lifted"));                   // letter glides up
-    at(2700, () => {                                               // envelope drifts away and fades out completely
+    at(200,  () => env.classList.add("flap"));                     // flap slowly opens
+    at(700,  () => env.classList.add("lifted"));                   // letter glides up
+    at(1500, () => {                                               // envelope drifts away and fades out completely
       window.scrollTo(0, 0);
       env.classList.add("leaving", "gone");
     });
-    at(3650, () => document.querySelector("main").classList.add("reveal"));   // then the invitation rises in on its own
-    // Tidy up only once nothing is moving (the card finishes at 5250 ms), so no stutter mid-animation.
-    at(5500, () => { env.remove(); document.body.classList.remove("sealed"); });
+    at(2000, () => document.querySelector("main").classList.add("reveal"));   // then the invitation rises in on its own
+    // Tidy up only once nothing is moving (the card finishes at 3300 ms), so no stutter mid-animation.
+    at(3500, () => { env.remove(); document.body.classList.remove("sealed"); });
   };
 }
 
