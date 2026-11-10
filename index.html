@@ -7,9 +7,9 @@
 <meta property="og:title" content="Joshwa & Ribeca | You're Invited" />
 <meta property="og:description" content="Tap to open your invitation to our wedding celebration, 11 to 13 December 2026, Lahore." />
 <meta property="og:type" content="website" />
-<!-- WhatsApp / social preview picture. Replace YOUR-USERNAME with your GitHub username (twice). -->
-<meta property="og:image" content="https://YOUR-USERNAME.github.io/wedding/preview.jpg" />
-<meta property="og:image:secure_url" content="https://YOUR-USERNAME.github.io/wedding/preview.jpg" />
+<!-- WhatsApp / social preview picture -->
+<meta property="og:image" content="https://joshwak.github.io/wedding-card/preview.jpg" />
+<meta property="og:image:secure_url" content="https://joshwak.github.io/wedding-card/preview.jpg" />
 <meta property="og:image:type" content="image/jpeg" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
@@ -101,7 +101,7 @@ body.sealed main{opacity:0;will-change:opacity,transform}
 body.sealed .spark,body.sealed .arch-card::after{animation-play-state:paused}
 #envelope{will-change:opacity}
 body.sealed .couple-name,body.sealed .couple-and{animation-play-state:paused}
-main.reveal{animation:cardIn 1.8s cubic-bezier(.25,.1,.25,1) both;will-change:opacity,transform}
+main.reveal{animation:cardIn 1.6s cubic-bezier(.25,.1,.25,1) both;will-change:opacity,transform}
 main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
 @keyframes cardIn{from{opacity:0;transform:translate3d(0,18px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
 
@@ -115,7 +115,7 @@ main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
 #envelope.env-wait .env,#envelope.env-wait .env-hint,#envelope.env-wait .env-to{opacity:0;pointer-events:none}
 @media(prefers-reduced-motion:reduce){.env-loader span{animation:none}}
 #envelope{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
-  background:radial-gradient(ellipse at 50% 40%,#f7f1e8 0%,#f2ece4 60%,#ebe2d5 100%);padding:16px;transition:opacity 1.6s ease}
+  background:radial-gradient(ellipse at 50% 40%,#f7f1e8 0%,#f2ece4 60%,#ebe2d5 100%);padding:16px;transition:opacity .9s ease}
 #envelope.gone{opacity:0;pointer-events:none}
 /* Invalid or missing link: the envelope is replaced by a short message and never opens */
 #envelope.invalid .env,#envelope.invalid .env-hint,#envelope.invalid .env-to,#envelope.invalid .env-loader{display:none}
@@ -486,12 +486,13 @@ function setupEnvelope() {
     env.classList.add("opening");                                  // seal softly fades
     at(450,  () => env.classList.add("flap"));                     // flap slowly opens
     at(1500, () => env.classList.add("lifted"));                   // letter glides up
-    at(3000, () => {                                               // envelope drifts away, invitation fades in
-      env.classList.add("leaving", "gone");
-      document.querySelector("main").classList.add("reveal");
+    at(2700, () => {                                               // envelope drifts away and fades out completely
       window.scrollTo(0, 0);
+      env.classList.add("leaving", "gone");
     });
-    at(4700, () => { env.remove(); document.body.classList.remove("sealed"); });   // tidy up once the envelope has gone
+    at(3650, () => document.querySelector("main").classList.add("reveal"));   // then the invitation rises in on its own
+    // Tidy up only once nothing is moving (the card finishes at 5250 ms), so no stutter mid-animation.
+    at(5500, () => { env.remove(); document.body.classList.remove("sealed"); });
   };
 }
 
@@ -582,9 +583,11 @@ function init() {
   inviteRequest.then(d => {
     showEnvelope();
     if (d && d.ok === true) {
-      useInvite(d); applyInvite(); recordOpen(); loadGuestList();
+      const same = shownFromCache && JSON.stringify(cached) === JSON.stringify(d);
+      if (!same) { useInvite(d); applyInvite(); }
+      recordOpen(); loadGuestList();
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch (_) {}
-      if (wantsOpen) window.openEnvelope && window.openEnvelope();
+      if (wantsOpen) requestAnimationFrame(() => requestAnimationFrame(() => window.openEnvelope && window.openEnvelope()));
     } else if (d && d.ok === false) {               // made-up, edited or switched-off link
       try { localStorage.removeItem(CACHE_KEY); } catch (_) {}
       resetInvite(); blockInvitation(false);
