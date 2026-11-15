@@ -27,6 +27,14 @@
 body{background:var(--bg-page);color:var(--text);font-family:'Montserrat',sans-serif;overflow-x:hidden;margin:0}
 .font-script{font-family:'Pinyon Script',cursive}
 .footer-mark{font-family:'Great Vibes',cursive}
+/* Tribute to our parents (end of the invitation): cut-out photo standing in a soft-lit arch */
+.tribute{margin:36px -14px 6px;text-align:center}
+.tribute-title{font-family:'Great Vibes',cursive;font-weight:400;font-size:clamp(2.5rem,11vw,3.1rem);line-height:1.1;color:var(--gold-dark);margin:0}
+.tribute-sub{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:1.1rem;color:var(--muted);margin:4px 0 18px}
+.tribute-frame{max-width:420px;margin:0 auto;padding:7px;background:var(--bg-card);border-radius:400px 400px 20px 20px;box-shadow:0 18px 44px rgba(74,66,56,.15),0 0 0 1px rgba(181,148,91,.35)}
+.tribute-photo{position:relative;aspect-ratio:4/4.4;border-radius:393px 393px 14px 14px;border:1px solid rgba(181,148,91,.35);overflow:hidden;
+  background:radial-gradient(ellipse 70% 55% at 50% 38%,#fffaf1 0%,#f6ecdc 45%,#ead9bd 100%)}
+.tribute-photo img{position:absolute;left:0;bottom:0;width:100%;height:auto}
 .font-serif-title{font-family:'Playfair Display',serif}
 .arch-card{background:var(--bg-card);border-radius:260px 260px 24px 24px;box-shadow:0 20px 60px rgba(74,66,56,.12),0 0 0 1px rgba(181,148,91,.25);position:relative;overflow:hidden}
 .arch-inner{border-radius:250px 250px 18px 18px;border:1px solid rgba(181,148,91,.35);isolation:isolate}
@@ -344,6 +352,16 @@ main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
       </div>
 
       <div id="petals" class="pointer-events-none absolute inset-0" aria-hidden="true"></div>
+    </section>
+
+    <section class="tribute" aria-labelledby="tributeTitle">
+      <h2 id="tributeTitle" class="tribute-title">You will be missed</h2>
+      <p class="tribute-sub">Forever in our hearts</p>
+      <div class="tribute-frame">
+        <div class="tribute-photo">
+          <img src="parents-cut.webp" width="903" height="879" loading="lazy" decoding="async" alt="Our parents, smiling together">
+        </div>
+      </div>
     </section>
 
     <svg class="w-56 h-10 mt-2 mb-1" viewBox="0 0 224 40" fill="none" aria-hidden="true">
