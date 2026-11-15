@@ -160,12 +160,17 @@ main.reveal .couple-name,main.reveal .couple-and{animation-play-state:running}
 .seal{animation:pulse 2.4s ease-in-out infinite}
 @keyframes pulse{0%,100%{filter:drop-shadow(0 0 0 rgba(232,196,110,0))}50%{filter:drop-shadow(0 0 12px rgba(232,196,110,.75))}}
 
+/* Nudge: if the seal isn't tapped within 3 s, a gold ring ripples out from it (the seal itself stays still) */
+#envelope.nudge .seal::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid rgba(214,178,104,.85);pointer-events:none;animation:ripple 2.4s ease-out infinite}
+#envelope.nudge .env-hint{animation:hintGlow 2.4s ease-in-out infinite}
+@keyframes ripple{0%{transform:scale(1);opacity:0}6%{opacity:.9}55%,100%{transform:scale(1.9);opacity:0}}
+@keyframes hintGlow{0%,100%{color:#7a7064}12%,30%{color:#8c6d3b}}
 #envelope.opening .seal{transform:translate(-50%,-46%) scale(.92);opacity:0;animation:none}
 #envelope.opening .env-hint,#envelope.opening .env-to{opacity:0}
 #envelope.flap .env-flap{transform:rotateX(180deg);z-index:0}
 #envelope.lifted .env-letter{transform:translateY(-46%)}
 #envelope.leaving .env{opacity:0}
-@media(prefers-reduced-motion:reduce){.seal{animation:none}.env-flap,.env-letter,.seal{transition-duration:.01s}main.reveal{animation:none}}
+@media(prefers-reduced-motion:reduce){.seal,#envelope.nudge .seal::after,#envelope.nudge .env-hint{animation:none}.env-flap,.env-letter,.seal{transition-duration:.01s}main.reveal{animation:none}}
 /* Rotating Bible verse at the top of the card */
 .verse{width:100%;max-width:17.5rem;min-height:7.4rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.55rem;margin-inline:auto;
   transition:opacity 1.4s ease,filter 1.4s ease,transform 1.4s ease}
@@ -472,7 +477,16 @@ function setupEnvelope() {
   document.body.classList.add("sealed");
   if (env.classList.contains("invalid")) { $("envInvalid").hidden = false; return; }
   const quick = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // If the guest hasn't tapped the seal 3 s after it appears, gently show them where to tap.
+  let tapped = false;
+  const armNudge = () => setTimeout(() => {
+    if (tapped || !document.contains(env)) return;
+    if (env.classList.contains("env-wait")) return armNudge();     // envelope not shown yet: count from when it is
+    env.classList.add("nudge");
+  }, 3000);
+  armNudge();
   $("sealBtn").addEventListener("click", () => {
+    tapped = true; env.classList.remove("nudge");
     if (!invite.ok) {                                              // not confirmed yet: open as soon as it is
       wantsOpen = true; $("envHint").textContent = "Opening your invitation..."; $("envHint").classList.add("waiting");
       return;
@@ -480,7 +494,7 @@ function setupEnvelope() {
     window.openEnvelope();
   });
   window.openEnvelope = () => {
-    if (env.dataset.opened) return; env.dataset.opened = "1";
+    if (env.dataset.opened) return; env.dataset.opened = "1"; env.classList.remove("nudge");
     const at = (ms, fn) => setTimeout(fn, quick ? 0 : ms);
     $("envHint").textContent = "Tap the seal to open";
     env.classList.add("opening");                                  // seal softly fades
